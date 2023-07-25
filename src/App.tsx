@@ -1,52 +1,75 @@
-import About from "./components/About";
-import Home from "./components/Home";
-
 import {
-  Outlet,
-  Link,
   Router,
   Route,
   RootRoute,
-  lazy,
+  RouterProvider
 } from '@tanstack/router'
-import Products from "./components/Products";
-import ProductsDetails from "./components/ProductsDetails";
-import Posts from "./components/Posts";
-import PostInfo from "./components/PostInfo";
+import Root from './components/Root'
+import Index from './components/Index'
+import Home from './components/Home';
+import About from './components/About';
+import Products from './components/Products';
+import ProductsDetails from './components/ProductsDetails';
+import Posts from './components/Posts';
+import PostInfo from './components/PostInfo';
+import NotFound from './components/NotFound';
 
 const rootRoute = new RootRoute({
-  component: App,
+  component: Root,
 })
 
-const indexRoute = new Route({ getParentRoute: () => rootRoute, path: '/' })
-const homeRoute = new Route({ getParentRoute: () => rootRoute, path: 'home', component: Home })
-const postsRoute = new Route({ getParentRoute: () => rootRoute, path: 'posts', component: Posts, })
-const singlePostRoute = new Route({
-  getParentRoute: () => postsRoute,
-  path: "$postId",
-  component: PostInfo,
-})
+const indexRoute = new Route({ getParentRoute: () => rootRoute, path: '/', component: Index });
+const homeRoute = new Route({ getParentRoute: () => rootRoute, path: '/home', component: Home });
+const aboutRoute = new Route({ getParentRoute: () => rootRoute, path: '/about', component: About });
 
-const aboutRoute = new Route({ getParentRoute: () => rootRoute, path: '/about', component: () => <About /> })
-
-const productsRoute = new Route({ getParentRoute: () => rootRoute, path: 'products', component: Products,  })
+const productsRoute = new Route({ getParentRoute: () => rootRoute, path: '/products', component: Products });
 const singleProductRoute = new Route({
   getParentRoute: () => productsRoute,
-  path: "$id",
+  path: "/$id",
   component: ProductsDetails
-})
+});
 
+interface PostSearch {
+  page?: number
+  sortBy?: string
+  sortOrder?: string
+}
+
+const postsRoute = new Route({
+  getParentRoute: () => rootRoute,
+  path: '/posts',
+  component: Posts,
+  validateSearch: (search: Record<string, unknown>): PostSearch => {
+    // validate and parse the search params into a typed state
+    return {
+      page: Number(search?.page),
+      sortBy: search?.sortBy as string,
+      sortOrder: search?.sortOrder as string
+    }
+  }
+});
+
+const singlePostRoute = new Route({
+  getParentRoute: () => rootRoute,
+  path: "/posts/$postId",
+  component: PostInfo,
+  getKey: ({ search }) => search
+});
+
+
+const notFoundRoute = new Route({ getParentRoute: () => rootRoute, path: '/*', component: NotFound });
 
 const routeTree = rootRoute.addChildren([
   indexRoute,
   homeRoute,
   aboutRoute,
   productsRoute.addChildren([singleProductRoute]),
-
-  postsRoute.addChildren([singlePostRoute])
+  postsRoute,
+  singlePostRoute,
+  notFoundRoute
 ])
 
-export const router = new Router({ routeTree })
+const router = new Router({ routeTree })
 
 declare module '@tanstack/router' {
   interface Register {
@@ -58,21 +81,7 @@ function App() {
 
   return (
     <>
-      <h1>This app component</h1>
-      <Link to="/home">Home</Link>
-      <br />
-      <Link to="/posts">Posts</Link>
-      <br />
-      <Link to="/posts/$postId" params={{ postId: '5' }}>Product 5</Link>
-      <br />
-      <Link to="/products" activeOptions={{exact: true}}>Products</Link>
-      <br />
-      <Link to="/products/$id" params={{ id: '5' }}>Product 5</Link>
-      {/* <Link to="/about">About</Link>
-      
-      <br />
-       */}
-      <Outlet />
+      <RouterProvider router={router} />
     </>
   )
 }

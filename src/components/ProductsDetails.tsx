@@ -1,15 +1,15 @@
-import {
-  useMatch
-} from '@tanstack/router'
+import { useParams } from '@tanstack/router';
+
+
 
 const ProductsDetails = () => {
-    console.log("id");
-    const {params} = useMatch();
-    console.log("test",params);
+    const params = useParams();
+
+    console.log("Product id is", params.id);
     return (
-        <div>
-            Product with id: 
-        </div>
+        <h1>
+            Product with id: {params?.id}
+        </h1>
     );
 };
 

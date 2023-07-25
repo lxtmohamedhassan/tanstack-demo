@@ -1,7 +1,5 @@
-import { Link, Route } from "@tanstack/router";
+import { Link, useSearch } from "@tanstack/router";
 import { useEffect, useState } from "react";
-import { postsRoute } from "../App";
-import PostInfo from "./PostInfo";
 
 type Post = {
     id: number;
@@ -10,10 +8,12 @@ type Post = {
     userId: number;
 }
 
-
-
 const Posts = () => {
+
     const [posts, setPosts] = useState<Post[]>();
+
+    const queryParams = useSearch();
+    console.log("queryParams",queryParams);
 
     useEffect(() => {
         fetch("https://jsonplaceholder.typicode.com/posts")
@@ -24,13 +24,16 @@ const Posts = () => {
     return (
         <>
             <h1>
-                This posts page
+                All posts page
             </h1>
-            <ul>            
+            <h3>Posts Page: {queryParams?.page}</h3>
+            <h3>Sorting Type: {queryParams?.sortBy}</h3>
+            <h3>Sorting Order: {queryParams?.sortOrder}</h3>
+            <ul>
                 {posts?.map(post => {
                     return (
                         <li key={post.id}>
-                            <Link from="/posts" to={`/posts/${post.id}`} params={{ postId: String(post.id)}}>
+                            <Link to={`/posts/$postId`} params={{ postId: String(post.id)}}>
                                 {post.title}
                             </Link>
                         </li>

@@ -1,6 +1,10 @@
 
+import { useSearch } from '@tanstack/router';
 const About = () => {
-    console.log("about component");
+
+    const match = useSearch();
+    console.log(match);
+
     return (
         <div>
             <h1>This About page</h1>
