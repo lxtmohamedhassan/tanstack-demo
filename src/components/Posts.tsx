@@ -1,4 +1,4 @@
-import { Link, useSearch } from "@tanstack/router";
+import { Link, useNavigate, useSearch } from "@tanstack/router";
 import { useEffect, useState } from "react";
 
 type Post = {
@@ -11,8 +11,9 @@ type Post = {
 const Posts = () => {
 
     const [posts, setPosts] = useState<Post[]>();
+    const navigate = useNavigate();
 
-    const queryParams = useSearch();
+    const queryParams = useSearch<'/posts'>();
     console.log("queryParams",queryParams);
 
     useEffect(() => {
@@ -20,6 +21,12 @@ const Posts = () => {
             .then((res) => res.json())
             .then((data) => setPosts(data.slice(0, 10)));
     }, []);
+
+    const handleSortPostsByTitle = () => {
+        navigate({
+            search: (prev) => ({ ...prev, sortBy: 'title' }),
+        });
+    }
 
     return (
         <>
@@ -29,6 +36,12 @@ const Posts = () => {
             <h3>Posts Page: {queryParams?.page}</h3>
             <h3>Sorting Type: {queryParams?.sortBy}</h3>
             <h3>Sorting Order: {queryParams?.sortOrder}</h3>
+
+            <div style={{ display: 'flex', gap: '16px' }}>
+                <Link search={(prev) => ({ ...prev, sortOrder: 'desc' })}>Sort Desc</Link>
+                <button onClick={handleSortPostsByTitle}>Sort by title</button>
+            </div>
+
             <ul>
                 {posts?.map(post => {
                     return (
